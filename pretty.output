@@ -1,0 +1,10 @@
+Feature: WEB - Findomestic Demo - Prestito personale Auto # tests/features/findomestic.feature:1
+
+  @TC04
+  Scenario: WEB TC04 Findomestic demo Prestito personale Auto nuova importo personalizzato  # tests/features/findomestic.feature:4
+    Given Accedi a findomestic.it                                                           # tests/steps/findomestic_steps.py:5
+    When Naviga in 'Prestito Personali Auto'                                                # tests/steps/findomestic_steps.py:13
+    And Richiedi prestito personale 'Auto Nuova' con importo 25000                          # None
+    Then Verifica flusso E2E 'Richiesta Prestito Online'                                    # None
+    And Risolvo verifiche                                                                   # None
+

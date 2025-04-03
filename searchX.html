@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricerca XPath</title>
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Allinea in alto */
+            align-items: center; /* Centra orizzontalmente */
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            padding-top: 50px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        #results {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #results div {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #results div:last-child {
+            border-bottom: none;
+        }
+
+        code {
+            color: #333;
+            background: #eaeaea;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+    </style>
+    <script>
+        let xpaths = [];
+
+        async function loadData() {
+            try {
+                const response = await fetch("xpaths.json");
+                xpaths = await response.json();
+                console.log("Dati caricati:", xpaths); // Debug: Controlla i dati nel browser
+            } catch (error) {
+                console.error("Errore nel caricamento del JSON:", error);
+            }
+        }
+
+        function searchXPath() {
+            let query = document.getElementById("search").value.toLowerCase().trim();
+            let results = document.getElementById("results");
+            results.innerHTML = "";
+
+            if (!query) return; // Se il campo è vuoto, non fare nulla
+
+            let filtered = xpaths.filter(item =>
+                item.text.toLowerCase().includes(query) ||
+                (item.attributes.href && item.attributes.href.toLowerCase().includes(query)) ||
+                (item.attributes.id && item.attributes.id.toLowerCase().includes(query))
+            );
+
+            if (filtered.length === 0) {
+                results.innerHTML = "<p>Nessun risultato trovato</p>";
+                return;
+            }
+
+            filtered.forEach(item => {
+                let div = document.createElement("div");
+                div.innerHTML = `<strong>${item.text || "(senza testo)"}</strong> - <code>${item.xpath}</code>`;
+                results.appendChild(div);
+            });
+        }
+
+        window.onload = () => {
+            loadData(); // Assicura che i dati vengano caricati prima della ricerca
+        };
+    </script>
+</head>
+<body>
+    <h1>Ricerca XPath</h1>
+    <input type="text" id="search" placeholder="Cerca per testo del link..." onkeyup="searchXPath()">
+    <div id="results"></div>
+</body>
+</html>
