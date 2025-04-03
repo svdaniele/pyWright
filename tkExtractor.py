@@ -77,7 +77,8 @@ root.title("Estrattore di XPath")
 root.geometry("800x500")
 
 tk.Label(root, text="URL della pagina:", font=("Ubuntu", 12)).pack(pady=5)
-url_entry = tk.Entry(root, width=80)
+text_var = tk.StringVar(root, value="https://")
+url_entry = tk.Entry(root, textvariable=text_var, width=80)
 url_entry.pack(pady=5)
 
 analyze_btn = tk.Button(root, text="Analizza", command=analyze_page, font=("Ubuntu", 12))
