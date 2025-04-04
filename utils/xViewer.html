@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XPath Viewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            margin: 0;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f7f9fc;
+        }
+
+        input[type="text"] {
+            padding: 0.5rem;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .results-container {
+            max-height: 300px;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 2rem;
+        }
+
+        .result {
+            padding: 0.5rem;
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .result:hover {
+            background: #e6f0ff;
+        }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+            border: 1px solid #ccc;
+        }
+
+        .highlight-box {
+            position: absolute;
+            border: 2px solid red;
+            background-color: rgba(255, 0, 0, 0.2);
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <h2>XPath Viewer</h2>
+    <input type="text" id="search" placeholder="Cerca testo elemento...">
+
+    <div class="results-container" id="results"></div>
+
+    <div class="image-container">
+        <img id="screenshot" src="screenshot.png" alt="Screenshot" />
+        <div id="highlight" class="highlight-box" style="display: none;"></div>
+    </div>
+
+    <script>
+        let data = [];
+
+        fetch("xpaths.json")
+            .then(response => response.json())
+            .then(json => data = json);
+
+        const searchInput = document.getElementById("search");
+        const resultsDiv = document.getElementById("results");
+        const highlightBox = document.getElementById("highlight");
+        const image = document.getElementById("screenshot");
+
+        searchInput.addEventListener("input", () => {
+            const search = searchInput.value.toLowerCase();
+            resultsDiv.innerHTML = "";
+
+            if (search.length < 2) return;
+
+            const filtered = data.filter(item => item.text && item.text.toLowerCase().includes(search));
+
+            filtered.forEach(item => {
+                const div = document.createElement("div");
+                div.className = "result";
+                div.innerHTML = `
+                    <strong>Testo:</strong> ${item.text}<br>
+                    <strong>Tag:</strong> ${item.tag}<br>
+                    <strong>XPath:</strong> ${item.xpath_optimized}<br>
+                    <strong>XPath Completo:</strong> ${item.xpath_full}
+                `;
+                div.addEventListener("click", () => {
+                    const scale = image.naturalWidth / image.width;
+                    const rect = item.position;
+                    highlightBox.style.left = (rect.x / scale) + "px";
+                    highlightBox.style.top = (rect.y / scale) + "px";
+                    highlightBox.style.width = (rect.width / scale) + "px";
+                    highlightBox.style.height = (rect.height / scale) + "px";
+                    highlightBox.style.display = "block";
+                });
+                resultsDiv.appendChild(div);
+            });
+        });
+    </script>
+</body>
+</html>

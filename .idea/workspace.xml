@@ -4,9 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f7ec980b-61f9-44d3-abe3-dbf54358fad4" name="Changes" comment="first">
-      <change afterPath="$PROJECT_DIR$/tkExtractor.py" afterDir="false" />
+    <list default="true" id="f7ec980b-61f9-44d3-abe3-dbf54358fad4" name="Changes" comment="doppio formato xpath">
+      <change afterPath="$PROJECT_DIR$/utils/full_screenshot.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/viewerExtractor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/xViewer.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/xpaths_with_coords.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/extractor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/searchX.html" beforeDir="false" afterPath="$PROJECT_DIR$/utils/searchX.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tkExtractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/tkExtractor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xpaths.json" beforeDir="false" afterPath="$PROJECT_DIR$/utils/xpaths.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,18 +42,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Python.extractor.executor": "Run",
-    "Python.tkExtractor.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Python.extractor.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tkExtractor.executor&quot;: &quot;Run&quot;,
+    &quot;Python.viewerExtractor.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/svdan/PycharmProjects/pyWright/utils&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\svdan\PycharmProjects\pyWright\utils" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -71,12 +85,30 @@
       <option name="project" value="LOCAL" />
       <updated>1743670203128</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="tk">
+      <option name="closed" value="true" />
+      <created>1743692635101</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1743692635101</updated>
+    </task>
+    <task id="LOCAL-00003" summary="doppio formato xpath">
+      <option name="closed" value="true" />
+      <created>1743756623136</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1743756623136</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="first" />
-    <option name="LAST_COMMIT_MESSAGE" value="first" />
+    <MESSAGE value="tk" />
+    <MESSAGE value="doppio formato xpath" />
+    <option name="LAST_COMMIT_MESSAGE" value="doppio formato xpath" />
   </component>
 </project>
