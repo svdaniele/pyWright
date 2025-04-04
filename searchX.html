@@ -1,109 +1,140 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ricerca XPath</title>
-    <style>
-        body {
-            font-family: 'Ubuntu', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start; /* Allinea in alto */
-            align-items: center; /* Centra orizzontalmente */
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f4;
-            padding-top: 50px;
-        }
+  <meta charset="UTF-8">
+  <title>Ricerca XPath</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Ubuntu', sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
 
-        h1 {
-            margin-bottom: 20px;
-        }
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
 
-        input {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 80%;
-            max-width: 400px;
-            text-align: center;
-        }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-        #results {
-            margin-top: 20px;
-            width: 80%;
-            max-width: 600px;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-        }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
 
-        #results div {
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-        }
+    .results {
+      max-height: 600px;
+      overflow-y: auto;
+    }
 
-        #results div:last-child {
-            border-bottom: none;
-        }
+    .result-item {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
 
-        code {
-            color: #333;
-            background: #eaeaea;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-size: 14px;
-        }
-    </style>
-    <script>
-        let xpaths = [];
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
 
-        async function loadData() {
-            try {
-                const response = await fetch("xpaths.json");
-                xpaths = await response.json();
-                console.log("Dati caricati:", xpaths); // Debug: Controlla i dati nel browser
-            } catch (error) {
-                console.error("Errore nel caricamento del JSON:", error);
-            }
-        }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 4px 8px;
+      margin-left: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
 
-        function searchXPath() {
-            let query = document.getElementById("search").value.toLowerCase().trim();
-            let results = document.getElementById("results");
-            results.innerHTML = "";
+    button:hover {
+      background-color: #45a049;
+    }
 
-            if (!query) return; // Se il campo è vuoto, non fare nulla
-
-            let filtered = xpaths.filter(item =>
-                item.text.toLowerCase().includes(query) ||
-                (item.attributes.href && item.attributes.href.toLowerCase().includes(query)) ||
-                (item.attributes.id && item.attributes.id.toLowerCase().includes(query))
-            );
-
-            if (filtered.length === 0) {
-                results.innerHTML = "<p>Nessun risultato trovato</p>";
-                return;
-            }
-
-            filtered.forEach(item => {
-                let div = document.createElement("div");
-                div.innerHTML = `<strong>${item.text || "(senza testo)"}</strong> - <code>${item.xpath}</code>`;
-                results.appendChild(div);
-            });
-        }
-
-        window.onload = () => {
-            loadData(); // Assicura che i dati vengano caricati prima della ricerca
-        };
-    </script>
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin-top: 12px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Ricerca XPath</h1>
-    <input type="text" id="search" placeholder="Cerca per testo del link..." onkeyup="searchXPath()">
-    <div id="results"></div>
+  <div class="container">
+    <h1>XPath Finder</h1>
+    <input type="text" id="search" placeholder="Cerca per testo visibile o tag...">
+    <div class="results" id="results"></div>
+  </div>
+
+  <script>
+    let data = [];
+
+    fetch('xpaths.json')
+      .then(response => response.json())
+      .then(json => {
+        data = json;
+      });
+
+    document.getElementById("search").addEventListener("input", function () {
+      const query = this.value.toLowerCase();
+      renderResults(query);
+    });
+
+    function renderResults(query) {
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      if (query.trim() === "") return;
+
+      const filteredData = data.filter(item =>
+        item.text.toLowerCase().includes(query) || item.tag.toLowerCase().includes(query)
+      );
+
+      filteredData.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "result-item";
+        div.innerHTML = `
+          <strong>${item.text}</strong><br>
+          <span style="font-size: 0.9em; color: #666;">Tag: ${item.tag}</span><br>
+          <div style="margin-top: 8px;">
+            <span style="font-weight: bold;">Ottimizzato:</span>
+            <code>${item.xpath_optimized}</code>
+            <button onclick="copyToClipboard('${item.xpath_optimized.replace(/'/g, "\\'")}')">📋</button>
+          </div>
+          <div style="margin-top: 8px;">
+            <span style="font-weight: bold;">Completo:</span>
+            <code>${item.xpath_full}</code>
+            <button onclick="copyToClipboard('${item.xpath_full.replace(/'/g, "\\'")}')">📋</button>
+          </div>
+          <hr>
+        `;
+        resultsDiv.appendChild(div);
+      });
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("XPath copiato!");
+      });
+    }
+  </script>
 </body>
 </html>

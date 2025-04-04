@@ -59,7 +59,34 @@ try:
             }
 
             if text.strip():  # Evitiamo di salvare elementi senza testo utile
-                data.append({"xpath": xpath, "text": text, "tag": tag, "attributes": attributes})
+                #data.append({"xpath": xpath, "text": text, "tag": tag, "attributes": attributes})
+                # Ottieni anche l'XPath completo tramite JavaScript
+                full_xpath = driver.execute_script("""
+                function getElementXPath(elt) {
+                    var path = "";
+                    for (; elt && elt.nodeType == 1; elt = elt.parentNode) {
+                        idx = 1;
+                        for (var sib = elt.previousSibling; sib; sib = sib.previousSibling) {
+                            if (sib.nodeType == 1 && sib.tagName == elt.tagName) idx++;
+                        }
+                        var xname = elt.tagName.toLowerCase();
+                        var xpathIndex = (idx > 1) ? "[" + idx + "]" : "";
+                        path = "/" + xname + xpathIndex + path;
+                    }
+                    return path;
+                }
+                return getElementXPath(arguments[0]);
+                """, elem)
+
+                if text.strip():  # Evitiamo di salvare elementi senza testo utile
+                    data.append({
+                        "xpath_optimized": xpath,
+                        "xpath_full": full_xpath,
+                        "text": text,
+                        "tag": tag,
+                        "attributes": attributes
+                    })
+
         except:
             continue
 
