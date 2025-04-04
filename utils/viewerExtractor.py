@@ -10,11 +10,12 @@ from io import BytesIO
 
 # Setup WebDriver
 options = webdriver.ChromeOptions()
-options.add_argument("--start-maximized")
+options.add_argument("--headless")
+options.add_argument("--window-size=1920,1080")
 options.add_argument("--hide-scrollbars")
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-url = "https://findomestic.it"
+url = "https://playwright.dev"
 driver.get(url)
 time.sleep(3)  # Tempo di attesa per caricamento iniziale
 
@@ -44,27 +45,21 @@ def find_sticky_elements():
 
 
 # Screenshot a sezioni senza elementi sticky
-def take_full_screenshot_without_sticky():
-    # Imposta la dimensione della finestra per larghezza completa
-    driver.set_window_size(total_width, 1000)  # Altezza fissa per ogni sezione
+def take_full_screenshot_with_sticky_first_only():
+    driver.set_window_size(total_width, 1000)
 
-    # Trova elementi sticky/fixed
     sticky_elements = find_sticky_elements()
     print(f"Trovati {len(sticky_elements)} elementi sticky/fixed")
 
-    # Salva valori originali per ripristinarli dopo
     original_styles = {}
 
-    # Funzione per nascondere elementi sticky
     def hide_sticky_elements():
         for i, elem in enumerate(sticky_elements):
             original_style = driver.execute_script("return arguments[0].style.cssText;", elem)
             original_display = driver.execute_script("return window.getComputedStyle(arguments[0]).display;", elem)
             original_styles[i] = (original_style, original_display)
-            # Nascondi l'elemento
             driver.execute_script("arguments[0].style.display = 'none';", elem)
 
-    # Funzione per ripristinare elementi sticky
     def restore_sticky_elements():
         for i, elem in enumerate(sticky_elements):
             if i in original_styles:
@@ -73,47 +68,38 @@ def take_full_screenshot_without_sticky():
                 if original_display != 'none':
                     driver.execute_script(f"arguments[0].style.display = '{original_display}';", elem)
 
-    # Calcola quante sezioni sono necessarie
     window_height = 1000
     sections = total_height // window_height + (1 if total_height % window_height > 0 else 0)
 
-    # Crea un'immagine vuota per il risultato finale
     full_image = Image.new('RGB', (total_width, total_height))
 
     try:
         for i in range(sections):
-            # Scorrimento alla posizione corretta
             scroll_position = i * window_height
             driver.execute_script(f"window.scrollTo(0, {scroll_position});")
-            time.sleep(0.5)  # Attesa per il rendering
+            time.sleep(0.5)
 
-            # Nascondi elementi sticky prima di catturare la screenshot
-            hide_sticky_elements()
-            time.sleep(0.2)  # Breve attesa per l'aggiornamento del DOM
+            if i > 0:
+                hide_sticky_elements()
+                time.sleep(0.2)
 
-            # Cattura screenshot senza elementi sticky
             screenshot = driver.get_screenshot_as_png()
             section_image = Image.open(BytesIO(screenshot))
 
-            # Ripristina elementi sticky per lo scrolling normale
-            restore_sticky_elements()
+            if i > 0:
+                restore_sticky_elements()
 
-            # Calcola la posizione y dove incollare questa sezione
-            y_position = scroll_position
-
-            # Incolla la sezione nell'immagine completa
-            full_image.paste(section_image, (0, y_position))
-
-            print(f"Catturata sezione {i + 1}/{sections} - Scroll position: {scroll_position}")
+            full_image.paste(section_image, (0, scroll_position))
+            print(f"Catturata sezione {i + 1}/{sections} - Scroll: {scroll_position}")
     finally:
-        # Assicurati che gli elementi sticky vengano ripristinati anche in caso di errore
         restore_sticky_elements()
 
     return full_image
 
 
+
 # Cattura l'immagine completa
-full_image = take_full_screenshot_without_sticky()
+full_image = take_full_screenshot_with_sticky_first_only()
 
 # Salva l'immagine completa
 screenshot_path = "full_screenshot.png"
@@ -218,12 +204,23 @@ for elem in elements:
         continue
 
 # Save JSON with coordinates and xpaths
+# Aggiungi metadati generali
+output = {
+    "screenshot_dimensions": {
+        "width": full_image.width,
+        "height": full_image.height
+    },
+    "elements": data
+}
+
+# Salva JSON
 json_path = "xpaths_with_coords.json"
 with open(json_path, "w", encoding="utf-8") as f:
-    json.dump(data, f, indent=2, ensure_ascii=False)
+    json.dump(output, f, indent=2, ensure_ascii=False)
 
 print(f"Screenshot completo salvato in: {screenshot_path}")
 print(f"Dati JSON salvati in: {json_path}")
 print(f"Dimensioni dell'immagine salvata: {full_image.width}x{full_image.height}")
+
 
 driver.quit()

@@ -1,118 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>XPath Viewer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Ubuntu', sans-serif;
-            margin: 0;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #f7f9fc;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>XPath Viewer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
 
-        input[type="text"] {
-            padding: 0.5rem;
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
+    body {
+        font-family: 'Ubuntu', sans-serif;
+        margin: 0;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #f7f9fc;
+    }
 
-        .results-container {
-            max-height: 300px;
-            overflow-y: auto;
-            width: 100%;
-            max-width: 800px;
-            margin-bottom: 2rem;
-        }
+    header {
+      padding: 20px;
+      text-align: center;
+      background-color: #222;
+      color: white;
+    }
 
-        .result {
-            padding: 0.5rem;
-            background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-        }
+    #search {
+      margin: 20px auto;
+      display: block;
+      width: 80%;
+      max-width: 600px;
+      padding: 10px;
+      font-size: 16px;
+    }
 
-        .result:hover {
-            background: #e6f0ff;
-        }
+    #container {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+    }
 
-        .image-container {
-            position: relative;
-            display: inline-block;
-            border: 1px solid #ccc;
-        }
+    #results {
+      width: 40%;
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+    }
 
-        .highlight-box {
-            position: absolute;
-            border: 2px solid red;
-            background-color: rgba(255, 0, 0, 0.2);
-            pointer-events: none;
-            z-index: 10;
-        }
-    </style>
+    .result {
+      margin-bottom: 10px;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      right: 10px;
+      top: 8px;
+      cursor: pointer;
+      color: blue;
+      font-weight: bold;
+    }
+
+    #screenshot-container {
+      position: relative;
+      width: 60%;
+      max-height: calc(100vh - 140px);
+      overflow: auto;
+    }
+
+    #screenshot {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .highlight {
+      position: absolute;
+      border: 2px solid red;
+      pointer-events: none;
+      box-sizing: border-box;
+    }
+  </style>
 </head>
 <body>
-    <h2>XPath Viewer</h2>
-    <input type="text" id="search" placeholder="Cerca testo elemento...">
+  <header>
+    <h1>XPath Viewer</h1>
+  </header>
 
-    <div class="results-container" id="results"></div>
+  <input type="text" id="search" placeholder="Cerca per testo, XPath o attributi...">
 
-    <div class="image-container">
-        <img id="screenshot" src="screenshot.png" alt="Screenshot" />
-        <div id="highlight" class="highlight-box" style="display: none;"></div>
+  <div id="container">
+    <div id="results"></div>
+    <div id="screenshot-container">
+      <img id="screenshot" src="full_screenshot.png" alt="Screenshot completo" />
     </div>
+  </div>
 
-    <script>
-        let data = [];
+  <script>
+    let originalData = [];
 
-        fetch("xpaths.json")
-            .then(response => response.json())
-            .then(json => data = json);
+    fetch("xpaths_with_coords.json")
+      .then((res) => res.json())
+      .then((json) => {
+        const screenshot = document.getElementById("screenshot");
+        const results = document.getElementById("results");
+        const container = document.getElementById("screenshot-container");
+        originalData = json.elements;
 
-        const searchInput = document.getElementById("search");
-        const resultsDiv = document.getElementById("results");
-        const highlightBox = document.getElementById("highlight");
-        const image = document.getElementById("screenshot");
+        const originalWidth = json.screenshot_dimensions.width;
+        const originalHeight = json.screenshot_dimensions.height;
 
-        searchInput.addEventListener("input", () => {
-            const search = searchInput.value.toLowerCase();
-            resultsDiv.innerHTML = "";
+        const displayOverlay = (el) => {
+          const rect = el.coordinates;
 
-            if (search.length < 2) return;
+          const scaleX = screenshot.clientWidth / originalWidth;
+          const scaleY = screenshot.clientHeight / originalHeight;
 
-            const filtered = data.filter(item => item.text && item.text.toLowerCase().includes(search));
+          const overlay = document.createElement("div");
+          overlay.className = "highlight";
+          overlay.style.left = `${rect.x * scaleX}px`;
+          overlay.style.top = `${rect.y * scaleY}px`;
+          overlay.style.width = `${rect.width * scaleX}px`;
+          overlay.style.height = `${rect.height * scaleY}px`;
 
-            filtered.forEach(item => {
-                const div = document.createElement("div");
-                div.className = "result";
-                div.innerHTML = `
-                    <strong>Testo:</strong> ${item.text}<br>
-                    <strong>Tag:</strong> ${item.tag}<br>
-                    <strong>XPath:</strong> ${item.xpath_optimized}<br>
-                    <strong>XPath Completo:</strong> ${item.xpath_full}
-                `;
-                div.addEventListener("click", () => {
-                    const scale = image.naturalWidth / image.width;
-                    const rect = item.position;
-                    highlightBox.style.left = (rect.x / scale) + "px";
-                    highlightBox.style.top = (rect.y / scale) + "px";
-                    highlightBox.style.width = (rect.width / scale) + "px";
-                    highlightBox.style.height = (rect.height / scale) + "px";
-                    highlightBox.style.display = "block";
-                });
-                resultsDiv.appendChild(div);
-            });
+          container.appendChild(overlay);
+        };
+
+        const clearOverlays = () => {
+          document.querySelectorAll(".highlight").forEach((el) => el.remove());
+        };
+
+        const updateResults = (data) => {
+          results.innerHTML = "";
+          clearOverlays();
+
+          if (data.length === 0) {
+            results.innerHTML = "<p>Nessun risultato trovato.</p>";
+            return;
+          }
+
+          data.forEach((el) => {
+            const div = document.createElement("div");
+            div.className = "result";
+            div.innerHTML = `
+                <strong>${el.text}</strong><br/>
+                <div style="margin-top: 5px;">
+                  <div><strong>xpath:</strong> <code>${el.xpath}</code> <span class="copy-btn" title="Copia xpath">📋</span></div>
+                  <div><strong>full_xpath:</strong> <code>${el.full_xpath}</code> <span class="copy-btn" title="Copia full_xpath">📋</span></div>
+                </div>
+              `;
+
+              // Copia per xpath
+              div.querySelector(".copy-btn[title='Copia xpath']").addEventListener("click", () => {
+                navigator.clipboard.writeText(el.xpath);
+                alert("XPath copiato!");
+              });
+
+              // Copia per full_xpath
+              div.querySelector(".copy-btn[title='Copia full_xpath']").addEventListener("click", () => {
+                navigator.clipboard.writeText(el.full_xpath);
+                alert("Full XPath copiato!");
+              });
+
+
+            div.addEventListener("mouseenter", () => displayOverlay(el));
+            div.addEventListener("mouseleave", clearOverlays);
+
+            results.appendChild(div);
+          });
+        };
+
+
+        document.getElementById("search").addEventListener("input", (e) => {
+          const query = e.target.value.toLowerCase();
+          const filtered = originalData.filter((el) =>
+            el.text?.toLowerCase().includes(query) ||
+            el.xpath?.toLowerCase().includes(query) ||
+            el.full_xpath?.toLowerCase().includes(query)
+          );
+          updateResults(filtered);
         });
-    </script>
+
+        updateResults(originalData);
+      })
+      .catch((err) => {
+        console.error("Errore nel caricamento JSON:", err);
+        document.getElementById("results").innerHTML =
+          "<p>Errore nel caricamento dei dati.</p>";
+      });
+  </script>
 </body>
 </html>
